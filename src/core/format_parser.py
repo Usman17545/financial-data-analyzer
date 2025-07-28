@@ -6,19 +6,15 @@ class FormatParser:
         currency_symbols = ('$', '₹', '€', '£', '¥', '₽', '₩', 'Rs.', 'Rs', 'USD', 'EUR', 'PKR')
         currency = str(currency).strip()
         for symbol in currency_symbols:
-            if currency.startswith(symbol):
-                currency = currency[len(symbol):].strip()
-        for symbol in currency_symbols:
-            if currency.endswith(symbol):
-                currency = currency[:-len(symbol)].strip()
-        return currency
+            currency = currency.replace(symbol, '')
+        return currency.strip()
     def detect_format(self,value):
         if ',' in value and '.' in value:
             return 'european' if value.rfind(',') > value.rfind('.') else 'american'
-        elif ',' in value:
-            return 'european'
-        else:
-            return 'american'
+        #elif ',' in value:
+            #return 'european'
+        #else:
+            #return 'american'
 
     def handle_special_formats(self,value):
         value = str(value).strip()
@@ -50,34 +46,31 @@ class FormatParser:
         else: 
             value = value.replace(',', '')
         return value
-    def parse_date(self, value):
-        value = str(value).strip()
+    def clean_amount(self, value):
+        value = self.normalize_currency(value)
+        value = self.handle_special_formats(value)
+        value = self.parse_amount(value)
         try:
-            if value.isdigit():
-                serial = int(value)
-                if serial > 59:
-                    base = datetime(1899, 12, 30)
-                    return (base + timedelta(days=serial)).strftime('%Y-%m-%d')
+            return int(float(value))
         except:
-            pass
-        quarter_match = re.match(r'(?:Q([1-4])[\s\-]?(\d{2,4}))|(?:Quarter\s*([1-4])\s+(\d{2,4}))', value, re.IGNORECASE)
-        if quarter_match:
-            q1, y1, q2, y2 = quarter_match.groups()
-            quarter = int(q1 or q2)
-            year = int(y1 or y2)
-            if year < 100:
-                year += 2000
-            month = (quarter - 1) * 3 + 1
-            return f"{year}-{month:02d}-01"
-        try:
-            dt = parser.parse(value)
-            return dt.strftime('%Y-%m-%d')
-        except:
-            return None
+            return str(value)
 
 
-p1 = FormatParser()
-s= p1.normalize_currency("2.5m")
-s= p1.handle_special_formats(s)
-s=p1.parse_amount(s)
-print(s)
+parser = FormatParser()
+test_values = [
+    "$1,200.00",
+    "(1,000.50)",
+    "100K",
+    "2.5M",
+    "PKR 3,500",
+    "USD 5.5B",
+    "-4,000",
+    "4,000-",
+    "Rs.7,500"
+]
+
+print("=== Currency Test Results ===\n")
+for i, val in enumerate(test_values):
+    result = parser.clean_amount(val)
+    print(f"Test {i+1:02} | Input: {val:<15} --> Output: {result} ({type(result).__name__})")
+
