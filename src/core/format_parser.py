@@ -1,6 +1,4 @@
 from dateutil import parser
-from datetime import datetime, timedelta
-import re
 class FormatParser:
     def normalize_currency(self, currency):
         currency_symbols = ('$', '₹', '€', '£', '¥', '₽', '₩', 'Rs.', 'Rs', 'USD', 'EUR', 'PKR')
