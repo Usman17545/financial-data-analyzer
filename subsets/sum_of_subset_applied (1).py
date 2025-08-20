@@ -7,20 +7,11 @@ df = pd.read_csv('F:/ML IPYNB/financial-data-parser/data/processed/ledger.csv') 
 target = pd.read_csv('F:/ML IPYNB/financial-data-parser/data/processed/target.csv',header = None)
 # Convert DataFrame into dictionary
 ledger_dict = dict(zip(df['Document No.'], df['Amount']))
-ledger_dict
-
-len(ledger_dict)
-
-target
-
-len(target)
 
 #convert target dataframe into list
 target.iloc[:, 0] = pd.to_numeric(target.iloc[:, 0], errors='coerce')
 target = target.dropna().reset_index(drop=True)
 target_list = target.iloc[:, 0].astype(float).tolist()
-len(target_list)
-
 
 def subset_dict_near_zero(filtered_dict, target_value, margin):
     results = []
@@ -66,9 +57,7 @@ def CalSubset(filtered_dict,target_value,margin):
 
 #if chnage target change [2] to [3] [4] ....
 target_value = target_list[5]
-print(target_value)
 filtered_dict = {k: v for k, v in ledger_dict.items() if 0 < v < target_value} # only take values less than target
-len(filtered_dict)
 
 start_time = time.time()
 print(f"Target Value is : {target_value}")
